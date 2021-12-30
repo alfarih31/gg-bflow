@@ -7,7 +7,7 @@ type meta struct {
 }
 
 var Meta = meta{
-	AppName:        "GG Bflow",
+	AppName:        "GG BFlow",
 	AppVersion:     Version,
 	AppDescription: "Go GRPC Buffer Flow",
 }
