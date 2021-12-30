@@ -1,12 +1,25 @@
 package main
 
 import (
+	"fmt"
+	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/logger"
 	"github.com/spf13/cobra"
 	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 )
+
+type files []string
+
+func (f files) String() string {
+	o := "Files:\n"
+	for i, s := range f {
+		o += fmt.Sprintf("  %d. %s\n", i+1, filepath.Base(s))
+	}
+
+	return o
+}
 
 func getRuntimeDir() (runDir string, err error) {
 	ex, err := os.Executable()
@@ -18,17 +31,22 @@ func getRuntimeDir() (runDir string, err error) {
 	return
 }
 
-func listFiles(s string) (files []string, err error) {
-	err = filepath.Walk(s, func(path string, info fs.FileInfo, err error) error {
+func listFiles(s string) (files, error) {
+	var out []string
+	err := filepath.Walk(s, func(path string, info fs.FileInfo, err error) error {
 		if path == s {
 			return nil
 		}
 
-		files = append(files, path)
+		out = append(out, path)
 		return nil
 	})
 
-	return
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
 
 func copyFile(s string, d string) (err error) {
@@ -38,12 +56,16 @@ func copyFile(s string, d string) (err error) {
 	}
 
 	err = ioutil.WriteFile(d, data, 0755)
+	if err == nil {
+		logger.Log.Info(fmt.Sprintf(`Export %s completed`, filepath.Base(s)), map[string]string{"targetPath": d})
+	}
 	return
 }
 
 func copyFiles(ss []string, destDir string) (err error) {
 	for _, s := range ss {
-		err = copyFile(s, filepath.Join(destDir, filepath.Base(s)))
+		t := filepath.Join(destDir, filepath.Base(s))
+		err = copyFile(s, t)
 		if err != nil {
 			return
 		}
@@ -80,9 +102,11 @@ func exportPBCmd(rc *cobra.Command) {
 				return
 			}
 
-			files, err := listFiles(filepath.Join(runDir, "api/grpc"))
+			logger.Log.Info("Listing gRPC Generated PB Files...")
+			pbs, err := listFiles(filepath.Join(runDir, "api/grpc"))
+			fmt.Println(pbs)
 
-			err = copyFiles(files, targetDir)
+			err = copyFiles(pbs, targetDir)
 			return
 		},
 	}
@@ -94,6 +118,12 @@ func init() {
 	cmd := &cobra.Command{
 		Use:   "export",
 		Short: "Export GG-BBFlow API files, such: .env.example & gRPC Generated PB",
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			logger.Log.Infof("Run %s...", cmd.CommandPath())
+		},
+		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+			logger.Log.Infof("%s completed", cmd.CommandPath())
+		},
 	}
 
 	f := cmd.PersistentFlags()

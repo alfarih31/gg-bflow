@@ -30,7 +30,7 @@ func Start() error {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", cfg.ServerName, cfg.Port))
 
-	logger.Log.Info(fmt.Sprintf("GRPC Controller running: %s", lis.Addr()))
+	logger.Log.Info(fmt.Sprintf("gRPC Controller running: %s", lis.Addr()))
 	err = s.Serve(lis)
 	if err != nil {
 		return err
