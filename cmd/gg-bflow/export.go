@@ -6,8 +6,8 @@ import (
 	"github.com/spf13/cobra"
 	"io/fs"
 	"io/ioutil"
-	"os"
 	"path/filepath"
+	"runtime"
 )
 
 type files []string
@@ -21,13 +21,16 @@ func (f files) String() string {
 	return o
 }
 
-func getRuntimeDir() (runDir string, err error) {
-	ex, err := os.Executable()
-	if err != nil {
+func getSourceDir() (runDir string, err error) {
+	_, ex, _, ok := runtime.Caller(0)
+	if !ok {
+		err = fmt.Errorf("%s", "No runtime!")
 		return
 	}
 
 	runDir = filepath.Dir(ex)
+
+	runDir = filepath.Join(filepath.Dir(ex), "../../")
 	return
 }
 
@@ -79,12 +82,14 @@ func exportEnvCmd(rc *cobra.Command) {
 		Use:   "env",
 		Short: "Export .env.example",
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			runDir, err := getRuntimeDir()
+			runDir, err := getSourceDir()
 			if err != nil {
 				return
 			}
 
-			err = copyFile(filepath.Join(runDir, ".env.example"), filepath.Join(targetDir, ".env.example"))
+			envFile := filepath.Join(runDir, ".env.example")
+			logger.Log.Info(fmt.Sprintf("Copying .env.example from: %s ...", envFile))
+			err = copyFile(envFile, filepath.Join(targetDir, ".env.example"))
 			return
 		},
 	}
@@ -97,13 +102,14 @@ func exportPBCmd(rc *cobra.Command) {
 		Use:   "pb",
 		Short: "Export gRPC Generated PB",
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			runDir, err := getRuntimeDir()
+			runDir, err := getSourceDir()
 			if err != nil {
 				return
 			}
 
-			logger.Log.Info("Listing gRPC Generated PB Files...")
-			pbs, err := listFiles(filepath.Join(runDir, "api/grpc"))
+			pbDir := filepath.Join(runDir, "api/grpc")
+			logger.Log.Info(fmt.Sprintf("Listing gRPC Generated PB Files on: %s ...", pbDir))
+			pbs, err := listFiles(pbDir)
 			fmt.Println(pbs)
 
 			err = copyFiles(pbs, targetDir)
