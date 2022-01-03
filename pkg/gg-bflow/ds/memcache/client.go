@@ -16,6 +16,10 @@ func Add(i *mc.Item) error {
 	return c.Add(i)
 }
 
+func Set(i *mc.Item) error {
+	return c.Set(i)
+}
+
 func Get(k string) (*mc.Item, error) {
 	return c.Get(k)
 }
@@ -24,6 +28,8 @@ func Init() error {
 	cfg := configs.Memcache
 
 	c = mc.New(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
+	c.MaxIdleConns = cfg.MaxConcurrent
+	c.Timeout = cfg.Timeout
 
 	return nil
 }

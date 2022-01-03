@@ -47,7 +47,7 @@ func WriteNew(ctx context.Context, key string, data []byte) (s *buffer_dto.Stat,
 		Expiration: int32(configs.GGBFlow.BufferExp),
 	}
 
-	err = memcache.Add(i)
+	err = memcache.Set(i)
 	if err != nil {
 		return nil, err
 	}
