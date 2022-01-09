@@ -11,15 +11,15 @@ service GGBFlow {
 }
 
 service GGBFlowStreamer {
-    rpc SendDiscreteFlow(SendArg) returns (Ok);
-    rpc SendFlow(stream SendArg) returns (Ok);
-    rpc SaveMeta(MetaArg) returns (Ok);
+    rpc SendDiscreteFlow(SendFlowArg) returns (Ok);
+    rpc SendFlow(stream SendFlowArg) returns (Ok);
+    rpc SaveMeta(SaveMetaArg) returns (Ok);
 }
 
 service GGBFlowViewer {
-    rpc LoadDiscreteFlow(LoadArg) returns (FlowRes);
-    rpc LoadFlow(stream LoadArg) returns (stream FlowRes);
-    rpc LoadMeta(LoadArg) returns (MetaRes);
+    rpc LoadDiscreteFlow(LoadDiscreteFlowArg) returns (DiscreteFlowRes);
+    rpc LoadFlow(LoadFlowArg) returns (stream FlowRes);
+    rpc LoadMeta(LoadMetaArg) returns (MetaRes);
 }
 
 message Ok {
@@ -31,17 +31,31 @@ message HealthCheckRes {
   repeated KeyValue Data = 1;
 }
 
-message LoadArg {
+message LoadDiscreteFlowArg {
+    string Key = 1;
+}
+
+message LoadFlowArg {
+    string Key = 1;
+    int64 Rate = 2;
+}
+
+message LoadMetaArg {
   string Key = 1;
 }
 
-message SendArg {
+message SendFlowArg {
   string Key = 1;
-  bytes ByteArr = 2;
+  bytes Byte = 2;
+}
+
+message DiscreteFlowRes {
+    bytes Byte = 1;
 }
 
 message FlowRes {
-  bytes ByteArr = 2;
+  bytes Byte = 1;
+  string Info = 2;
 }
 
 enum ValueType {
@@ -61,7 +75,7 @@ message KeyValue {
   optional float FloatValue = 6;
 }
 
-message MetaArg {
+message SaveMetaArg {
   string Key = 1;
   repeated KeyValue Meta = 2;
 }

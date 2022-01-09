@@ -20,10 +20,10 @@ type streamerCtrl struct {
 	metaSvc   meta.MetaSvc
 }
 
-func (c streamerCtrl) SendDiscreteFlow(ctx context.Context, in *gg_bflow.SendArg) (*gg_bflow.Ok, error) {
+func (c streamerCtrl) SendDiscreteFlow(ctx context.Context, in *gg_bflow.SendFlowArg) (*gg_bflow.Ok, error) {
 	arg := &buffer_dto.WriteArg{
 		Key:  in.GetKey(),
-		Data: in.GetByteArr(),
+		Data: in.GetByte(),
 	}
 
 	if err := validator.Validate(arg); err != nil {
@@ -67,7 +67,7 @@ func (c streamerCtrl) SendFlow(s gg_bflow.GGBFlowStreamer_SendFlowServer) error 
 	return s.SendAndClose(res)
 }
 
-func (f *streamerCtrl) SaveMeta(ctx context.Context, in *gg_bflow.MetaArg) (*gg_bflow.Ok, error) {
+func (f *streamerCtrl) SaveMeta(ctx context.Context, in *gg_bflow.SaveMetaArg) (*gg_bflow.Ok, error) {
 	arg := meta_dto.WriteArg{
 		Key:  in.GetKey(),
 		Meta: grpc_message_adapters.GRPCKeyValueToKeyValue(in.GetMeta()),
