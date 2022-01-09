@@ -97,22 +97,22 @@ func exportEnvCmd(rc *cobra.Command) {
 	rc.AddCommand(cmd)
 }
 
-func exportPBCmd(rc *cobra.Command) {
+func exportProtoCmd(rc *cobra.Command) {
 	cmd := &cobra.Command{
-		Use:   "pb",
-		Short: "Export gRPC Generated PB",
+		Use:   "proto",
+		Short: "Export gRPC Proto",
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			runDir, err := getSourceDir()
 			if err != nil {
 				return
 			}
 
-			pbDir := filepath.Join(runDir, "api/grpc")
-			logger.Log.Info(fmt.Sprintf("Listing gRPC Generated PB Files on: %s ...", pbDir))
-			pbs, err := listFiles(pbDir)
-			fmt.Println(pbs)
+			pbDir := filepath.Join(runDir, "proto")
+			logger.Log.Info(fmt.Sprintf("Listing gRPC Proto Files on: %s ...", pbDir))
+			ps, err := listFiles(pbDir)
+			fmt.Println(ps)
 
-			err = copyFiles(pbs, targetDir)
+			err = copyFiles(ps, targetDir)
 			return
 		},
 	}
@@ -123,7 +123,7 @@ func exportPBCmd(rc *cobra.Command) {
 func init() {
 	cmd := &cobra.Command{
 		Use:   "export",
-		Short: "Export GG-BBFlow API files, such: .env.example & gRPC Generated PB",
+		Short: "Export GG-BBFlow API files, such: .env.example & gRPC proto",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			logger.Log.Infof("Run %s...", cmd.CommandPath())
 		},
@@ -136,7 +136,7 @@ func init() {
 	f.StringVarP(&targetDir, "out-dir", "o", "./", "Target export directory")
 
 	exportEnvCmd(cmd)
-	exportPBCmd(cmd)
+	exportProtoCmd(cmd)
 
 	rootCmd.AddCommand(cmd)
 }

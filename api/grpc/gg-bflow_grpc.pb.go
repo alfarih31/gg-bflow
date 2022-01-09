@@ -20,12 +20,6 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GGBFlowClient interface {
 	HealthCheck(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*HealthCheckRes, error)
-	LoadDiscreteFlow(ctx context.Context, in *LoadArg, opts ...grpc.CallOption) (*FlowRes, error)
-	SendDiscreteFlow(ctx context.Context, in *SendArg, opts ...grpc.CallOption) (*Ok, error)
-	LoadFlow(ctx context.Context, opts ...grpc.CallOption) (GGBFlow_LoadFlowClient, error)
-	SendFlow(ctx context.Context, opts ...grpc.CallOption) (GGBFlow_SendFlowClient, error)
-	SaveMeta(ctx context.Context, in *MetaArg, opts ...grpc.CallOption) (*Ok, error)
-	LoadMeta(ctx context.Context, in *LoadArg, opts ...grpc.CallOption) (*MetaRes, error)
 }
 
 type gGBFlowClient struct {
@@ -45,118 +39,11 @@ func (c *gGBFlowClient) HealthCheck(ctx context.Context, in *emptypb.Empty, opts
 	return out, nil
 }
 
-func (c *gGBFlowClient) LoadDiscreteFlow(ctx context.Context, in *LoadArg, opts ...grpc.CallOption) (*FlowRes, error) {
-	out := new(FlowRes)
-	err := c.cc.Invoke(ctx, "/ggbflow.GGBFlow/LoadDiscreteFlow", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *gGBFlowClient) SendDiscreteFlow(ctx context.Context, in *SendArg, opts ...grpc.CallOption) (*Ok, error) {
-	out := new(Ok)
-	err := c.cc.Invoke(ctx, "/ggbflow.GGBFlow/SendDiscreteFlow", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *gGBFlowClient) LoadFlow(ctx context.Context, opts ...grpc.CallOption) (GGBFlow_LoadFlowClient, error) {
-	stream, err := c.cc.NewStream(ctx, &GGBFlow_ServiceDesc.Streams[0], "/ggbflow.GGBFlow/LoadFlow", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &gGBFlowLoadFlowClient{stream}
-	return x, nil
-}
-
-type GGBFlow_LoadFlowClient interface {
-	Send(*LoadArg) error
-	Recv() (*FlowRes, error)
-	grpc.ClientStream
-}
-
-type gGBFlowLoadFlowClient struct {
-	grpc.ClientStream
-}
-
-func (x *gGBFlowLoadFlowClient) Send(m *LoadArg) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *gGBFlowLoadFlowClient) Recv() (*FlowRes, error) {
-	m := new(FlowRes)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *gGBFlowClient) SendFlow(ctx context.Context, opts ...grpc.CallOption) (GGBFlow_SendFlowClient, error) {
-	stream, err := c.cc.NewStream(ctx, &GGBFlow_ServiceDesc.Streams[1], "/ggbflow.GGBFlow/SendFlow", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &gGBFlowSendFlowClient{stream}
-	return x, nil
-}
-
-type GGBFlow_SendFlowClient interface {
-	Send(*SendArg) error
-	CloseAndRecv() (*Ok, error)
-	grpc.ClientStream
-}
-
-type gGBFlowSendFlowClient struct {
-	grpc.ClientStream
-}
-
-func (x *gGBFlowSendFlowClient) Send(m *SendArg) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *gGBFlowSendFlowClient) CloseAndRecv() (*Ok, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(Ok)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *gGBFlowClient) SaveMeta(ctx context.Context, in *MetaArg, opts ...grpc.CallOption) (*Ok, error) {
-	out := new(Ok)
-	err := c.cc.Invoke(ctx, "/ggbflow.GGBFlow/SaveMeta", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *gGBFlowClient) LoadMeta(ctx context.Context, in *LoadArg, opts ...grpc.CallOption) (*MetaRes, error) {
-	out := new(MetaRes)
-	err := c.cc.Invoke(ctx, "/ggbflow.GGBFlow/LoadMeta", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // GGBFlowServer is the server API for GGBFlow service.
 // All implementations must embed UnimplementedGGBFlowServer
 // for forward compatibility
 type GGBFlowServer interface {
 	HealthCheck(context.Context, *emptypb.Empty) (*HealthCheckRes, error)
-	LoadDiscreteFlow(context.Context, *LoadArg) (*FlowRes, error)
-	SendDiscreteFlow(context.Context, *SendArg) (*Ok, error)
-	LoadFlow(GGBFlow_LoadFlowServer) error
-	SendFlow(GGBFlow_SendFlowServer) error
-	SaveMeta(context.Context, *MetaArg) (*Ok, error)
-	LoadMeta(context.Context, *LoadArg) (*MetaRes, error)
 	mustEmbedUnimplementedGGBFlowServer()
 }
 
@@ -166,24 +53,6 @@ type UnimplementedGGBFlowServer struct {
 
 func (UnimplementedGGBFlowServer) HealthCheck(context.Context, *emptypb.Empty) (*HealthCheckRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
-}
-func (UnimplementedGGBFlowServer) LoadDiscreteFlow(context.Context, *LoadArg) (*FlowRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LoadDiscreteFlow not implemented")
-}
-func (UnimplementedGGBFlowServer) SendDiscreteFlow(context.Context, *SendArg) (*Ok, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendDiscreteFlow not implemented")
-}
-func (UnimplementedGGBFlowServer) LoadFlow(GGBFlow_LoadFlowServer) error {
-	return status.Errorf(codes.Unimplemented, "method LoadFlow not implemented")
-}
-func (UnimplementedGGBFlowServer) SendFlow(GGBFlow_SendFlowServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendFlow not implemented")
-}
-func (UnimplementedGGBFlowServer) SaveMeta(context.Context, *MetaArg) (*Ok, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SaveMeta not implemented")
-}
-func (UnimplementedGGBFlowServer) LoadMeta(context.Context, *LoadArg) (*MetaRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LoadMeta not implemented")
 }
 func (UnimplementedGGBFlowServer) mustEmbedUnimplementedGGBFlowServer() {}
 
@@ -216,130 +85,6 @@ func _GGBFlow_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GGBFlow_LoadDiscreteFlow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LoadArg)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GGBFlowServer).LoadDiscreteFlow(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/ggbflow.GGBFlow/LoadDiscreteFlow",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GGBFlowServer).LoadDiscreteFlow(ctx, req.(*LoadArg))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GGBFlow_SendDiscreteFlow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SendArg)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GGBFlowServer).SendDiscreteFlow(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/ggbflow.GGBFlow/SendDiscreteFlow",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GGBFlowServer).SendDiscreteFlow(ctx, req.(*SendArg))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GGBFlow_LoadFlow_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(GGBFlowServer).LoadFlow(&gGBFlowLoadFlowServer{stream})
-}
-
-type GGBFlow_LoadFlowServer interface {
-	Send(*FlowRes) error
-	Recv() (*LoadArg, error)
-	grpc.ServerStream
-}
-
-type gGBFlowLoadFlowServer struct {
-	grpc.ServerStream
-}
-
-func (x *gGBFlowLoadFlowServer) Send(m *FlowRes) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *gGBFlowLoadFlowServer) Recv() (*LoadArg, error) {
-	m := new(LoadArg)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func _GGBFlow_SendFlow_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(GGBFlowServer).SendFlow(&gGBFlowSendFlowServer{stream})
-}
-
-type GGBFlow_SendFlowServer interface {
-	SendAndClose(*Ok) error
-	Recv() (*SendArg, error)
-	grpc.ServerStream
-}
-
-type gGBFlowSendFlowServer struct {
-	grpc.ServerStream
-}
-
-func (x *gGBFlowSendFlowServer) SendAndClose(m *Ok) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *gGBFlowSendFlowServer) Recv() (*SendArg, error) {
-	m := new(SendArg)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func _GGBFlow_SaveMeta_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MetaArg)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GGBFlowServer).SaveMeta(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/ggbflow.GGBFlow/SaveMeta",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GGBFlowServer).SaveMeta(ctx, req.(*MetaArg))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GGBFlow_LoadMeta_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LoadArg)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GGBFlowServer).LoadMeta(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/ggbflow.GGBFlow/LoadMeta",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GGBFlowServer).LoadMeta(ctx, req.(*LoadArg))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // GGBFlow_ServiceDesc is the grpc.ServiceDesc for GGBFlow service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -351,33 +96,389 @@ var GGBFlow_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "HealthCheck",
 			Handler:    _GGBFlow_HealthCheck_Handler,
 		},
-		{
-			MethodName: "LoadDiscreteFlow",
-			Handler:    _GGBFlow_LoadDiscreteFlow_Handler,
-		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "gg-bflow.proto",
+}
+
+// GGBFlowStreamerClient is the client API for GGBFlowStreamer service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type GGBFlowStreamerClient interface {
+	SendDiscreteFlow(ctx context.Context, in *SendArg, opts ...grpc.CallOption) (*Ok, error)
+	SendFlow(ctx context.Context, opts ...grpc.CallOption) (GGBFlowStreamer_SendFlowClient, error)
+	SaveMeta(ctx context.Context, in *MetaArg, opts ...grpc.CallOption) (*Ok, error)
+}
+
+type gGBFlowStreamerClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewGGBFlowStreamerClient(cc grpc.ClientConnInterface) GGBFlowStreamerClient {
+	return &gGBFlowStreamerClient{cc}
+}
+
+func (c *gGBFlowStreamerClient) SendDiscreteFlow(ctx context.Context, in *SendArg, opts ...grpc.CallOption) (*Ok, error) {
+	out := new(Ok)
+	err := c.cc.Invoke(ctx, "/ggbflow.GGBFlowStreamer/SendDiscreteFlow", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gGBFlowStreamerClient) SendFlow(ctx context.Context, opts ...grpc.CallOption) (GGBFlowStreamer_SendFlowClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GGBFlowStreamer_ServiceDesc.Streams[0], "/ggbflow.GGBFlowStreamer/SendFlow", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &gGBFlowStreamerSendFlowClient{stream}
+	return x, nil
+}
+
+type GGBFlowStreamer_SendFlowClient interface {
+	Send(*SendArg) error
+	CloseAndRecv() (*Ok, error)
+	grpc.ClientStream
+}
+
+type gGBFlowStreamerSendFlowClient struct {
+	grpc.ClientStream
+}
+
+func (x *gGBFlowStreamerSendFlowClient) Send(m *SendArg) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *gGBFlowStreamerSendFlowClient) CloseAndRecv() (*Ok, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(Ok)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *gGBFlowStreamerClient) SaveMeta(ctx context.Context, in *MetaArg, opts ...grpc.CallOption) (*Ok, error) {
+	out := new(Ok)
+	err := c.cc.Invoke(ctx, "/ggbflow.GGBFlowStreamer/SaveMeta", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// GGBFlowStreamerServer is the server API for GGBFlowStreamer service.
+// All implementations must embed UnimplementedGGBFlowStreamerServer
+// for forward compatibility
+type GGBFlowStreamerServer interface {
+	SendDiscreteFlow(context.Context, *SendArg) (*Ok, error)
+	SendFlow(GGBFlowStreamer_SendFlowServer) error
+	SaveMeta(context.Context, *MetaArg) (*Ok, error)
+	mustEmbedUnimplementedGGBFlowStreamerServer()
+}
+
+// UnimplementedGGBFlowStreamerServer must be embedded to have forward compatible implementations.
+type UnimplementedGGBFlowStreamerServer struct {
+}
+
+func (UnimplementedGGBFlowStreamerServer) SendDiscreteFlow(context.Context, *SendArg) (*Ok, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendDiscreteFlow not implemented")
+}
+func (UnimplementedGGBFlowStreamerServer) SendFlow(GGBFlowStreamer_SendFlowServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendFlow not implemented")
+}
+func (UnimplementedGGBFlowStreamerServer) SaveMeta(context.Context, *MetaArg) (*Ok, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveMeta not implemented")
+}
+func (UnimplementedGGBFlowStreamerServer) mustEmbedUnimplementedGGBFlowStreamerServer() {}
+
+// UnsafeGGBFlowStreamerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to GGBFlowStreamerServer will
+// result in compilation errors.
+type UnsafeGGBFlowStreamerServer interface {
+	mustEmbedUnimplementedGGBFlowStreamerServer()
+}
+
+func RegisterGGBFlowStreamerServer(s grpc.ServiceRegistrar, srv GGBFlowStreamerServer) {
+	s.RegisterService(&GGBFlowStreamer_ServiceDesc, srv)
+}
+
+func _GGBFlowStreamer_SendDiscreteFlow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendArg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GGBFlowStreamerServer).SendDiscreteFlow(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ggbflow.GGBFlowStreamer/SendDiscreteFlow",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GGBFlowStreamerServer).SendDiscreteFlow(ctx, req.(*SendArg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GGBFlowStreamer_SendFlow_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GGBFlowStreamerServer).SendFlow(&gGBFlowStreamerSendFlowServer{stream})
+}
+
+type GGBFlowStreamer_SendFlowServer interface {
+	SendAndClose(*Ok) error
+	Recv() (*SendArg, error)
+	grpc.ServerStream
+}
+
+type gGBFlowStreamerSendFlowServer struct {
+	grpc.ServerStream
+}
+
+func (x *gGBFlowStreamerSendFlowServer) SendAndClose(m *Ok) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *gGBFlowStreamerSendFlowServer) Recv() (*SendArg, error) {
+	m := new(SendArg)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _GGBFlowStreamer_SaveMeta_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MetaArg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GGBFlowStreamerServer).SaveMeta(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ggbflow.GGBFlowStreamer/SaveMeta",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GGBFlowStreamerServer).SaveMeta(ctx, req.(*MetaArg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// GGBFlowStreamer_ServiceDesc is the grpc.ServiceDesc for GGBFlowStreamer service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var GGBFlowStreamer_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "ggbflow.GGBFlowStreamer",
+	HandlerType: (*GGBFlowStreamerServer)(nil),
+	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "SendDiscreteFlow",
-			Handler:    _GGBFlow_SendDiscreteFlow_Handler,
+			Handler:    _GGBFlowStreamer_SendDiscreteFlow_Handler,
 		},
 		{
 			MethodName: "SaveMeta",
-			Handler:    _GGBFlow_SaveMeta_Handler,
+			Handler:    _GGBFlowStreamer_SaveMeta_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SendFlow",
+			Handler:       _GGBFlowStreamer_SendFlow_Handler,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "gg-bflow.proto",
+}
+
+// GGBFlowViewerClient is the client API for GGBFlowViewer service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type GGBFlowViewerClient interface {
+	LoadDiscreteFlow(ctx context.Context, in *LoadArg, opts ...grpc.CallOption) (*FlowRes, error)
+	LoadFlow(ctx context.Context, opts ...grpc.CallOption) (GGBFlowViewer_LoadFlowClient, error)
+	LoadMeta(ctx context.Context, in *LoadArg, opts ...grpc.CallOption) (*MetaRes, error)
+}
+
+type gGBFlowViewerClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewGGBFlowViewerClient(cc grpc.ClientConnInterface) GGBFlowViewerClient {
+	return &gGBFlowViewerClient{cc}
+}
+
+func (c *gGBFlowViewerClient) LoadDiscreteFlow(ctx context.Context, in *LoadArg, opts ...grpc.CallOption) (*FlowRes, error) {
+	out := new(FlowRes)
+	err := c.cc.Invoke(ctx, "/ggbflow.GGBFlowViewer/LoadDiscreteFlow", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gGBFlowViewerClient) LoadFlow(ctx context.Context, opts ...grpc.CallOption) (GGBFlowViewer_LoadFlowClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GGBFlowViewer_ServiceDesc.Streams[0], "/ggbflow.GGBFlowViewer/LoadFlow", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &gGBFlowViewerLoadFlowClient{stream}
+	return x, nil
+}
+
+type GGBFlowViewer_LoadFlowClient interface {
+	Send(*LoadArg) error
+	Recv() (*FlowRes, error)
+	grpc.ClientStream
+}
+
+type gGBFlowViewerLoadFlowClient struct {
+	grpc.ClientStream
+}
+
+func (x *gGBFlowViewerLoadFlowClient) Send(m *LoadArg) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *gGBFlowViewerLoadFlowClient) Recv() (*FlowRes, error) {
+	m := new(FlowRes)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *gGBFlowViewerClient) LoadMeta(ctx context.Context, in *LoadArg, opts ...grpc.CallOption) (*MetaRes, error) {
+	out := new(MetaRes)
+	err := c.cc.Invoke(ctx, "/ggbflow.GGBFlowViewer/LoadMeta", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// GGBFlowViewerServer is the server API for GGBFlowViewer service.
+// All implementations must embed UnimplementedGGBFlowViewerServer
+// for forward compatibility
+type GGBFlowViewerServer interface {
+	LoadDiscreteFlow(context.Context, *LoadArg) (*FlowRes, error)
+	LoadFlow(GGBFlowViewer_LoadFlowServer) error
+	LoadMeta(context.Context, *LoadArg) (*MetaRes, error)
+	mustEmbedUnimplementedGGBFlowViewerServer()
+}
+
+// UnimplementedGGBFlowViewerServer must be embedded to have forward compatible implementations.
+type UnimplementedGGBFlowViewerServer struct {
+}
+
+func (UnimplementedGGBFlowViewerServer) LoadDiscreteFlow(context.Context, *LoadArg) (*FlowRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoadDiscreteFlow not implemented")
+}
+func (UnimplementedGGBFlowViewerServer) LoadFlow(GGBFlowViewer_LoadFlowServer) error {
+	return status.Errorf(codes.Unimplemented, "method LoadFlow not implemented")
+}
+func (UnimplementedGGBFlowViewerServer) LoadMeta(context.Context, *LoadArg) (*MetaRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoadMeta not implemented")
+}
+func (UnimplementedGGBFlowViewerServer) mustEmbedUnimplementedGGBFlowViewerServer() {}
+
+// UnsafeGGBFlowViewerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to GGBFlowViewerServer will
+// result in compilation errors.
+type UnsafeGGBFlowViewerServer interface {
+	mustEmbedUnimplementedGGBFlowViewerServer()
+}
+
+func RegisterGGBFlowViewerServer(s grpc.ServiceRegistrar, srv GGBFlowViewerServer) {
+	s.RegisterService(&GGBFlowViewer_ServiceDesc, srv)
+}
+
+func _GGBFlowViewer_LoadDiscreteFlow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoadArg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GGBFlowViewerServer).LoadDiscreteFlow(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ggbflow.GGBFlowViewer/LoadDiscreteFlow",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GGBFlowViewerServer).LoadDiscreteFlow(ctx, req.(*LoadArg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GGBFlowViewer_LoadFlow_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GGBFlowViewerServer).LoadFlow(&gGBFlowViewerLoadFlowServer{stream})
+}
+
+type GGBFlowViewer_LoadFlowServer interface {
+	Send(*FlowRes) error
+	Recv() (*LoadArg, error)
+	grpc.ServerStream
+}
+
+type gGBFlowViewerLoadFlowServer struct {
+	grpc.ServerStream
+}
+
+func (x *gGBFlowViewerLoadFlowServer) Send(m *FlowRes) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *gGBFlowViewerLoadFlowServer) Recv() (*LoadArg, error) {
+	m := new(LoadArg)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _GGBFlowViewer_LoadMeta_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoadArg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GGBFlowViewerServer).LoadMeta(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ggbflow.GGBFlowViewer/LoadMeta",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GGBFlowViewerServer).LoadMeta(ctx, req.(*LoadArg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// GGBFlowViewer_ServiceDesc is the grpc.ServiceDesc for GGBFlowViewer service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var GGBFlowViewer_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "ggbflow.GGBFlowViewer",
+	HandlerType: (*GGBFlowViewerServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "LoadDiscreteFlow",
+			Handler:    _GGBFlowViewer_LoadDiscreteFlow_Handler,
 		},
 		{
 			MethodName: "LoadMeta",
-			Handler:    _GGBFlow_LoadMeta_Handler,
+			Handler:    _GGBFlowViewer_LoadMeta_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "LoadFlow",
-			Handler:       _GGBFlow_LoadFlow_Handler,
+			Handler:       _GGBFlowViewer_LoadFlow_Handler,
 			ServerStreams: true,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "SendFlow",
-			Handler:       _GGBFlow_SendFlow_Handler,
 			ClientStreams: true,
 		},
 	},

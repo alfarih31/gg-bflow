@@ -13,24 +13,9 @@ import (
 	"time"
 )
 
-type gRPCCtrl struct {
-	gg_bflow.UnimplementedGGBFlowServer
-	st        time.Time
-	bufferSvc buffer.BufferSvc
-	metaSvc   meta.MetaSvc
-}
-
-var instance = &gRPCCtrl{
-	bufferSvc: buffer.Svc,
-	metaSvc:   meta.Svc,
-}
+var startTime = time.Now()
 
 var s *_grpc.Server
-
-func Init() error {
-	instance.st = time.Now()
-	return instance.Init()
-}
 
 func Start() error {
 	cfg := configs.GGBFlow
@@ -46,14 +31,25 @@ func Start() error {
 	return nil
 }
 
-func (f *gRPCCtrl) Init() error {
+func Init() error {
 	cfg := configs.GGBFlow
 
 	sOpt := _grpc.ChainStreamInterceptor(interceptors.GetStreamValidateTokenInterceptor(cfg.APIKey, cfg.AuthorizedClient))
 	cOpt := _grpc.ChainUnaryInterceptor(interceptors.GetUnaryValidateTokenInterceptor(cfg.APIKey, cfg.AuthorizedClient, "/ggbflow.GGBFlow/HealthCheck"))
 
+	sCtrl := &streamerCtrl{
+		bufferSvc: buffer.Svc,
+		metaSvc:   meta.Svc,
+	}
+
+	vCtrl := &viewerCtrl{
+		bufferSvc: buffer.Svc,
+		metaSvc:   meta.Svc,
+	}
+
 	s = _grpc.NewServer(sOpt, cOpt)
-	s.RegisterService(&gg_bflow.GGBFlow_ServiceDesc, f)
+	s.RegisterService(&gg_bflow.GGBFlowStreamer_ServiceDesc, sCtrl)
+	s.RegisterService(&gg_bflow.GGBFlowViewer_ServiceDesc, vCtrl)
 
 	return nil
 }

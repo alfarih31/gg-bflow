@@ -1,13 +1,9 @@
 package app
 
-type meta struct {
-	AppName        string `json:"app_name"`
-	AppVersion     string `json:"app_version,omitempty"`
-	AppDescription string `json:"app_description"`
-}
+import keyvalue "github.com/alfarih31/nb-go-keyvalue"
 
-var Meta = meta{
-	AppName:        "GG BFlow",
-	AppVersion:     Version,
-	AppDescription: "Go GRPC Buffer Flow",
+var Meta = keyvalue.KeyValue{
+	"app_name":        "GG BFlow",
+	"app_version":     Version,
+	"app_description": "Go GRPC Buffer Flow",
 }

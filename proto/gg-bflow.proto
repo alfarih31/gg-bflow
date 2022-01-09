@@ -8,12 +8,18 @@ package ggbflow;
 
 service GGBFlow {
   rpc HealthCheck(google.protobuf.Empty) returns (HealthCheckRes);
-  rpc LoadDiscreteFlow(LoadArg) returns (FlowRes);
-  rpc SendDiscreteFlow(SendArg) returns (Ok);
-  rpc LoadFlow(stream LoadArg) returns (stream FlowRes);
-  rpc SendFlow(stream SendArg) returns (Ok);
-  rpc SaveMeta(MetaArg) returns (Ok);
-  rpc LoadMeta(LoadArg) returns (MetaRes);
+}
+
+service GGBFlowStreamer {
+    rpc SendDiscreteFlow(SendArg) returns (Ok);
+    rpc SendFlow(stream SendArg) returns (Ok);
+    rpc SaveMeta(MetaArg) returns (Ok);
+}
+
+service GGBFlowViewer {
+    rpc LoadDiscreteFlow(LoadArg) returns (FlowRes);
+    rpc LoadFlow(stream LoadArg) returns (stream FlowRes);
+    rpc LoadMeta(LoadArg) returns (MetaRes);
 }
 
 message Ok {
