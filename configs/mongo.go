@@ -3,11 +3,12 @@ package configs
 import _env "github.com/alfarih31/nb-go-env"
 
 type mongo struct {
-	Database string
-	Host     string
-	Port     int
-	User     string
-	Pass     string
+	Database   string
+	Host       string
+	Port       int
+	User       string
+	Pass       string
+	AuthSource string
 }
 
 var Mongo = new(mongo)
@@ -41,6 +42,12 @@ func (m *mongo) Load(env _env.Env) error {
 		return e
 	} else {
 		m.Pass = v
+	}
+
+	if v, e := env.GetString("MONGO_AUTHSOURCE"); e != nil {
+		return e
+	} else {
+		m.AuthSource = v
 	}
 
 	return nil

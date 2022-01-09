@@ -5,7 +5,6 @@ import (
 	"github.com/alfarih31/gg-bflow/api/grpc"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ctrl/grpc/errors"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/meta"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/meta/svc"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/validator"
 	grpc_message_adapters "github.com/alfarih31/gg-bflow/pkg/message-adapters"
 	"github.com/alfarih31/gg-bflow/pkg/utils/datetime"
@@ -21,7 +20,7 @@ func (f *gRPCCtrl) SaveMeta(ctx context.Context, in *gg_bflow.MetaArg) (*gg_bflo
 		return nil, err
 	}
 
-	err := meta_svc.Write(ctx, arg)
+	err := f.metaSvc.Write(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +31,7 @@ func (f *gRPCCtrl) SaveMeta(ctx context.Context, in *gg_bflow.MetaArg) (*gg_bflo
 }
 
 func (f *gRPCCtrl) LoadMeta(ctx context.Context, in *gg_bflow.LoadArg) (*gg_bflow.MetaRes, error) {
-	res, err := meta_svc.Read(ctx, in.GetKey())
+	res, err := f.metaSvc.Read(ctx, in.GetKey())
 	if err != nil {
 		return nil, err
 	}

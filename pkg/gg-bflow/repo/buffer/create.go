@@ -1,15 +1,22 @@
-package buffer_repo
+package buffer
 
 import (
 	"context"
 	"github.com/alfarih31/gg-bflow/configs"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ds/memcache"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/buffer"
 	mc "github.com/bradfitz/gomemcache/memcache"
 )
 
+type Create interface {
+	Write(ctx context.Context, key string, data []byte, force ...bool) error
+	WriteNew(ctx context.Context, key string, data []byte) error
+}
+
+type create struct {
+}
+
 // Write will write data to memcached if it already exists. Use `force` to force write
-func Write(ctx context.Context, key string, data []byte, force ...bool) (s *buffer_dto.Stat, err error) {
+func (c *create) Write(ctx context.Context, key string, data []byte, force ...bool) (err error) {
 	f := false
 	if len(force) > 0 {
 		f = force[0]
@@ -18,11 +25,11 @@ func Write(ctx context.Context, key string, data []byte, force ...bool) (s *buff
 	i, err := memcache.Get(key)
 
 	if err != nil && !f {
-		return nil, err
+		return err
 	}
 
 	if i == nil && f {
-		return WriteNew(ctx, key, data)
+		return c.WriteNew(ctx, key, data)
 	}
 
 	i.Value = data
@@ -30,17 +37,13 @@ func Write(ctx context.Context, key string, data []byte, force ...bool) (s *buff
 
 	err = memcache.Replace(i)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &buffer_dto.Stat{
-		Key:  key,
-		Data: data,
-		Exp:  int64(i.Expiration),
-	}, nil
+	return nil
 }
 
-func WriteNew(ctx context.Context, key string, data []byte) (s *buffer_dto.Stat, err error) {
+func (c *create) WriteNew(ctx context.Context, key string, data []byte) (err error) {
 	i := &mc.Item{
 		Key:        key,
 		Value:      data,
@@ -49,12 +52,12 @@ func WriteNew(ctx context.Context, key string, data []byte) (s *buffer_dto.Stat,
 
 	err = memcache.Set(i)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &buffer_dto.Stat{
-		Key:  key,
-		Data: data,
-		Exp:  int64(i.Expiration),
-	}, nil
+	return nil
+}
+
+func NewCreate() Create {
+	return new(create)
 }

@@ -1,4 +1,4 @@
-package meta_repo
+package meta
 
 import (
 	"context"
@@ -10,7 +10,14 @@ import (
 	mg "go.mongodb.org/mongo-driver/mongo"
 )
 
-func FindOne(ctx context.Context, k string) (*meta_dto.Item, error) {
+type Retrieve interface {
+	FindOne(ctx context.Context, k string) (*meta_dto.Item, error)
+}
+
+type retrieve struct {
+}
+
+func (retrieve) FindOne(ctx context.Context, k string) (*meta_dto.Item, error) {
 	i := new(model.Meta)
 	err := mongo.Query.Meta.Find(ctx, bson.M{"key": k}).One(i)
 
@@ -29,4 +36,8 @@ func FindOne(ctx context.Context, k string) (*meta_dto.Item, error) {
 		CreatedAt: i.CreatedAt.Time(),
 		UpdatedAt: i.UpdatedAt.Time(),
 	}, nil
+}
+
+func NewRetrieve() Retrieve {
+	return new(retrieve)
 }

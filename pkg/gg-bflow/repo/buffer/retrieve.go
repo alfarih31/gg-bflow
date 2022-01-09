@@ -1,4 +1,4 @@
-package buffer_repo
+package buffer
 
 import (
 	"context"
@@ -7,7 +7,14 @@ import (
 	mc "github.com/bradfitz/gomemcache/memcache"
 )
 
-func Read(ctx context.Context, key string) (s *buffer_dto.Stat, err error) {
+type Retrieve interface {
+	Read(ctx context.Context, key string) (s *buffer_dto.Stat, err error)
+}
+
+type retrieve struct {
+}
+
+func (r *retrieve) Read(ctx context.Context, key string) (s *buffer_dto.Stat, err error) {
 	i, err := memcache.Get(key)
 	if err == mc.ErrCacheMiss {
 		return &buffer_dto.Stat{
@@ -24,4 +31,8 @@ func Read(ctx context.Context, key string) (s *buffer_dto.Stat, err error) {
 		Data: i.Value,
 		Exp:  int64(i.Expiration),
 	}, nil
+}
+
+func NewRetrieve() Retrieve {
+	return new(retrieve)
 }

@@ -6,6 +6,8 @@ import (
 	"github.com/alfarih31/gg-bflow/configs"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ctrl/grpc/interceptors"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/logger"
+	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/svc/buffer"
+	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/svc/meta"
 	_grpc "google.golang.org/grpc"
 	"net"
 	"time"
@@ -13,10 +15,15 @@ import (
 
 type gRPCCtrl struct {
 	gg_bflow.UnimplementedGGBFlowServer
-	st time.Time
+	st        time.Time
+	bufferSvc buffer.BufferSvc
+	metaSvc   meta.MetaSvc
 }
 
-var instance = new(gRPCCtrl)
+var instance = &gRPCCtrl{
+	bufferSvc: buffer.Svc,
+	metaSvc:   meta.Svc,
+}
 
 var s *_grpc.Server
 

@@ -1,17 +1,16 @@
-package meta_svc
+package meta
 
 import (
 	"context"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/meta"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/meta/repo"
 	"github.com/alfarih31/gg-bflow/pkg/utils/datetime"
 )
 
-func Write(ctx context.Context, arg meta_dto.WriteArg) error {
+func (s *svc) Write(ctx context.Context, arg meta_dto.WriteArg) error {
 	var i *meta_dto.Item
 
 	// Get exist
-	i, err := Read(ctx, arg.Key)
+	i, err := s.Read(ctx, arg.Key)
 	if err != nil {
 		return err
 	}
@@ -25,12 +24,12 @@ func Write(ctx context.Context, arg meta_dto.WriteArg) error {
 			UpdatedAt: now,
 		}
 
-		err = meta_repo.Insert(ctx, i)
+		err = s.repo.Insert(ctx, i)
 	} else {
 		i.Metadata = arg.Meta
 		i.UpdatedAt = now
 
-		err = meta_repo.Update(ctx, arg.Key, i)
+		err = s.repo.UpdateOne(ctx, arg.Key, i)
 	}
 
 	return err

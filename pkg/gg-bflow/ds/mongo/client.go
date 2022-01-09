@@ -16,7 +16,12 @@ var (
 func Init() error {
 	cfg := configs.Mongo
 	client, err := qmgo.NewClient(context.TODO(), &qmgo.Config{
-		Uri: fmt.Sprintf("mongodb://%s:%s@%s:%d/%s", cfg.User, cfg.Pass, cfg.Host, cfg.Port, cfg.Database),
+		Uri: fmt.Sprintf("mongodb://%s:%d", cfg.Host, cfg.Port),
+		Auth: &qmgo.Credential{
+			Username:   cfg.User,
+			Password:   cfg.Pass,
+			AuthSource: cfg.AuthSource,
+		},
 	})
 
 	if err != nil {

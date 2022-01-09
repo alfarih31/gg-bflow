@@ -4,12 +4,9 @@ import (
 	"context"
 	"github.com/alfarih31/gg-bflow/api/grpc"
 	"github.com/alfarih31/gg-bflow/configs"
-	buffer_svc "github.com/alfarih31/gg-bflow/pkg/gg-bflow/buffer/svc"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ctrl/grpc/errors"
 	buffer_dto "github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/buffer"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/validator"
-	"github.com/alfarih31/gg-bflow/pkg/message-adapters"
-	keyvalue "github.com/alfarih31/nb-go-keyvalue"
 	"io"
 )
 
@@ -29,24 +26,18 @@ func (f *gRPCCtrl) SendDiscreteFlow(ctx context.Context, in *gg_bflow.SendArg) (
 		}
 	}
 
-	s, err := buffer_svc.Write(ctx, *arg)
-	if err != nil {
-		return nil, err
-	}
-
-	sKv, err := keyvalue.FromStruct(s)
+	err := f.bufferSvc.Write(ctx, *arg)
 	if err != nil {
 		return nil, err
 	}
 
 	return &gg_bflow.Ok{
 		Message: "OK",
-		Meta:    message_adapters.KeyValueToGRPCKeyValue(sKv),
 	}, nil
 }
 
 func (f *gRPCCtrl) LoadDiscreteFlow(ctx context.Context, in *gg_bflow.LoadArg) (*gg_bflow.FlowRes, error) {
-	d, err := buffer_svc.Read(ctx, in.GetKey())
+	d, err := f.bufferSvc.Read(ctx, in.GetKey())
 
 	if err != nil {
 		return nil, err

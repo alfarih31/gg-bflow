@@ -1,7 +1,6 @@
 package configs
 
 import (
-	"fmt"
 	_env "github.com/alfarih31/nb-go-env"
 	"time"
 )
@@ -39,8 +38,6 @@ func (m *memcache) Load(env _env.Env) error {
 	} else {
 		m.MaxConcurrent = v
 	}
-
-	fmt.Println(m)
 
 	return nil
 }

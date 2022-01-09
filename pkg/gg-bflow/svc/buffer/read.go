@@ -1,13 +1,12 @@
-package buffer_svc
+package buffer
 
 import (
 	"context"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/buffer/repo"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/buffer"
 )
 
-func Read(ctx context.Context, key string) (*buffer_dto.WriteArg, error) {
-	d, err := buffer_repo.Read(ctx, key)
+func (s *svc) Read(ctx context.Context, key string) (*buffer_dto.WriteArg, error) {
+	d, err := s.repo.Read(ctx, key)
 
 	if err != nil {
 		return nil, err
