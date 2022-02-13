@@ -60,9 +60,9 @@ Belows are list & description of needed configuration:
 |          |                         |                                                                                                                                                                                                                                                |          |                                                                |
 ## Development
 
-### Docker Build
+### GG BFlow Properties
 
-You can build `GG-BFlow` using `docker` by build & run this project using `docker-compose` config in `deployments/docker-compose.yaml`. Belows are step to build this project using `docker-compose`
+You can build properties to run `GG-BFlow` using `docker` by build `docker-compose` config in `deployments/docker-compose.props.yaml`. Belows are step to build properties of this project using `docker-compose`
 
 1. Create `docker bridge network` 
 
@@ -70,10 +70,10 @@ You can build `GG-BFlow` using `docker` by build & run this project using `docke
 docker network create gg-bflow-network
 ```
 
-2. Build this project
+2. Build properties
 
 ```shell
-docker-compose build -f ./deployments/docker-compose.yaml
+docker-compose build -f ./deployments/docker-compose.props.yaml
 ```
 
 ## Installation
@@ -83,7 +83,7 @@ To install this package, you need to install Go (**version 1.17+ is required**) 
 1. After you initiate your workspace then you can install this package with below command.
 
 ```shell
-go get -u github.com/alfarih31/gg-bflow
+go install github.com/alfarih31/gg-bflow
 ```
 
 2. Import it in your code
