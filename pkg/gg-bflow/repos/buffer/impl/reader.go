@@ -1,20 +1,23 @@
-package buffer
+package bufferImpl
 
 import (
 	"context"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ds/memcache"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/buffer"
+	buffer_dto "github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/buffer"
+	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/repos/buffer"
 	mc "github.com/bradfitz/gomemcache/memcache"
 )
 
-type Retrieve interface {
-	Read(ctx context.Context, key string) (s *buffer_dto.Stat, err error)
+var _ buffer.Reader = new(reader)
+
+type reader struct {
 }
 
-type retrieve struct {
+func NewReader() buffer.Reader {
+	return new(reader)
 }
 
-func (r *retrieve) Read(ctx context.Context, key string) (s *buffer_dto.Stat, err error) {
+func (r *reader) Read(ctx context.Context, key string) (s *buffer_dto.Stat, err error) {
 	i, err := memcache.Get(key)
 	if err == mc.ErrCacheMiss {
 		return &buffer_dto.Stat{
@@ -31,8 +34,4 @@ func (r *retrieve) Read(ctx context.Context, key string) (s *buffer_dto.Stat, er
 		Data: i.Value,
 		Exp:  int64(i.Expiration),
 	}, nil
-}
-
-func NewRetrieve() Retrieve {
-	return new(retrieve)
 }

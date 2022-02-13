@@ -6,8 +6,6 @@ import (
 	"github.com/alfarih31/gg-bflow/configs"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ctrl/grpc/interceptors"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/logger"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/svc/buffer"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/svc/meta"
 	_grpc "google.golang.org/grpc"
 	"net"
 	"time"
@@ -37,19 +35,13 @@ func Init() error {
 	sOpt := _grpc.ChainStreamInterceptor(interceptors.GetStreamValidateTokenInterceptor(cfg.APIKey, cfg.AuthorizedClient))
 	cOpt := _grpc.ChainUnaryInterceptor(interceptors.GetUnaryValidateTokenInterceptor(cfg.APIKey, cfg.AuthorizedClient, "/ggbflow.GGBFlow/HealthCheck"))
 
-	sCtrl := &streamerCtrl{
-		bufferSvc: buffer.Svc,
-		metaSvc:   meta.Svc,
-	}
+	sCtrl := new(senderCtrl)
 
-	vCtrl := &viewerCtrl{
-		bufferSvc: buffer.Svc,
-		metaSvc:   meta.Svc,
-	}
+	vCtrl := new(loaderCtrl)
 
 	s = _grpc.NewServer(sOpt, cOpt)
-	s.RegisterService(&gg_bflow.GGBFlowStreamer_ServiceDesc, sCtrl)
-	s.RegisterService(&gg_bflow.GGBFlowViewer_ServiceDesc, vCtrl)
+	s.RegisterService(&gg_bflow.GGBFlowSender_ServiceDesc, sCtrl)
+	s.RegisterService(&gg_bflow.GGBFlowLoader_ServiceDesc, vCtrl)
 
 	return nil
 }

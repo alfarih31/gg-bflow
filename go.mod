@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/alfarih31/nb-go-env v1.0.3
-	github.com/alfarih31/nb-go-keyvalue v1.0.6
+	github.com/alfarih31/nb-go-keyvalue v1.0.9
 	github.com/alfarih31/nb-go-logger v1.0.1
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/go-playground/validator/v10 v10.9.0

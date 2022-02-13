@@ -10,13 +10,13 @@ service GGBFlow {
   rpc HealthCheck(google.protobuf.Empty) returns (HealthCheckRes);
 }
 
-service GGBFlowStreamer {
-    rpc SendDiscreteFlow(SendFlowArg) returns (Ok);
+service GGBFlowSender {
+    rpc SendOneFlow(SendFlowArg) returns (Ok);
     rpc SendFlow(stream SendFlowArg) returns (Ok);
-    rpc SaveMeta(SaveMetaArg) returns (Ok);
+    rpc SendMeta(SendMetaArg) returns (Ok);
 }
 
-service GGBFlowViewer {
+service GGBFlowLoader {
     rpc LoadDiscreteFlow(LoadDiscreteFlowArg) returns (DiscreteFlowRes);
     rpc LoadFlow(LoadFlowArg) returns (stream FlowRes);
     rpc LoadMeta(LoadMetaArg) returns (MetaRes);
@@ -24,11 +24,12 @@ service GGBFlowViewer {
 
 message Ok {
   string Message = 1;
-  repeated KeyValue Meta = 2;
+  string Meta = 2;
 }
 
 message HealthCheckRes {
-  repeated KeyValue Data = 1;
+    string Uptime = 1;
+    string Meta = 2;
 }
 
 message LoadDiscreteFlowArg {
@@ -58,31 +59,15 @@ message FlowRes {
   string Info = 2;
 }
 
-enum ValueType {
-  UNKNOWN = 0;
-  STR = 1;
-  INT = 2;
-  FLOAT = 3;
-  BOOL = 4;
-}
 
-message KeyValue {
-  string  Key = 1;
-  ValueType Type = 2;
-  optional int64 IntValue = 3;
-  optional string StrValue = 4;
-  optional bool BoolValue = 5;
-  optional float FloatValue = 6;
-}
-
-message SaveMetaArg {
+message SendMetaArg {
   string Key = 1;
-  repeated KeyValue Meta = 2;
+  string Meta = 2;
 }
 
 message MetaRes {
   string Key = 1;
-  repeated KeyValue Meta = 2;
+  string Meta = 2;
   int64 CreatedAt = 3;
   int64 UpdatedAt = 4;
 }

@@ -1,22 +1,24 @@
-package buffer
+package bufferImpl
 
 import (
 	"context"
 	"github.com/alfarih31/gg-bflow/configs"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ds/memcache"
+	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/repos/buffer"
 	mc "github.com/bradfitz/gomemcache/memcache"
 )
 
-type Create interface {
-	Write(ctx context.Context, key string, data []byte, force ...bool) error
-	WriteNew(ctx context.Context, key string, data []byte) error
+var _ buffer.Writer = new(writer)
+
+type writer struct {
 }
 
-type create struct {
+func NewWriter() buffer.Writer {
+	return new(writer)
 }
 
 // Write will write data to memcached if it already exists. Use `force` to force write
-func (c *create) Write(ctx context.Context, key string, data []byte, force ...bool) (err error) {
+func (w *writer) Write(ctx context.Context, key string, data []byte, force ...bool) (err error) {
 	f := false
 	if len(force) > 0 {
 		f = force[0]
@@ -29,7 +31,7 @@ func (c *create) Write(ctx context.Context, key string, data []byte, force ...bo
 	}
 
 	if i == nil && f {
-		return c.WriteNew(ctx, key, data)
+		return w.WriteNew(ctx, key, data)
 	}
 
 	i.Value = data
@@ -43,7 +45,7 @@ func (c *create) Write(ctx context.Context, key string, data []byte, force ...bo
 	return nil
 }
 
-func (c *create) WriteNew(ctx context.Context, key string, data []byte) (err error) {
+func (w *writer) WriteNew(ctx context.Context, key string, data []byte) (err error) {
 	i := &mc.Item{
 		Key:        key,
 		Value:      data,
@@ -56,8 +58,4 @@ func (c *create) WriteNew(ctx context.Context, key string, data []byte) (err err
 	}
 
 	return nil
-}
-
-func NewCreate() Create {
-	return new(create)
 }

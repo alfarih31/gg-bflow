@@ -5,21 +5,18 @@ import (
 	"fmt"
 	"github.com/alfarih31/gg-bflow/api/grpc"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ctrl/grpc/errors"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/svc/buffer"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/svc/meta"
-	"github.com/alfarih31/gg-bflow/pkg/message-adapters"
-	"github.com/alfarih31/gg-bflow/pkg/utils/datetime"
+	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/repos/buffer"
+	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/repos/meta"
+	"github.com/alfarih31/gg-bflow/pkg/utils"
 	"time"
 )
 
-type viewerCtrl struct {
-	gg_bflow.UnimplementedGGBFlowViewerServer
-	bufferSvc buffer.BufferSvc
-	metaSvc   meta.MetaSvc
+type loaderCtrl struct {
+	gg_bflow.UnimplementedGGBFlowLoaderServer
 }
 
-func (v *viewerCtrl) LoadDiscreteFlow(ctx context.Context, in *gg_bflow.LoadDiscreteFlowArg) (*gg_bflow.DiscreteFlowRes, error) {
-	d, err := v.bufferSvc.Read(ctx, in.GetKey())
+func (v *loaderCtrl) LoadDiscreteFlow(ctx context.Context, in *gg_bflow.LoadDiscreteFlowArg) (*gg_bflow.DiscreteFlowRes, error) {
+	d, err := buffer.Do.Read(ctx, in.GetKey())
 
 	if err != nil {
 		return nil, err
@@ -34,7 +31,7 @@ func (v *viewerCtrl) LoadDiscreteFlow(ctx context.Context, in *gg_bflow.LoadDisc
 	}, nil
 }
 
-func (v *viewerCtrl) LoadFlow(a *gg_bflow.LoadFlowArg, s gg_bflow.GGBFlowViewer_LoadFlowServer) error {
+func (v *loaderCtrl) LoadFlow(a *gg_bflow.LoadFlowArg, s gg_bflow.GGBFlowLoader_LoadFlowServer) error {
 	r := a.GetRate()
 	info := ""
 	ms := int64(time.Millisecond)
@@ -69,8 +66,8 @@ func (v *viewerCtrl) LoadFlow(a *gg_bflow.LoadFlowArg, s gg_bflow.GGBFlowViewer_
 	}
 }
 
-func (v *viewerCtrl) LoadMeta(ctx context.Context, in *gg_bflow.LoadMetaArg) (*gg_bflow.MetaRes, error) {
-	res, err := v.metaSvc.Read(ctx, in.GetKey())
+func (v *loaderCtrl) LoadMeta(ctx context.Context, in *gg_bflow.LoadMetaArg) (*gg_bflow.MetaRes, error) {
+	res, err := meta.Do.Read(ctx, in.GetKey())
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +78,8 @@ func (v *viewerCtrl) LoadMeta(ctx context.Context, in *gg_bflow.LoadMetaArg) (*g
 
 	return &gg_bflow.MetaRes{
 		Key:       res.Key,
-		Meta:      message_adapters.KeyValueToGRPCKeyValue(res.Metadata),
-		CreatedAt: datetime.ToEpoch(res.CreatedAt),
-		UpdatedAt: datetime.ToEpoch(res.UpdatedAt),
+		Meta:      res.Metadata,
+		CreatedAt: utils.NewDatetimeFromTime(res.CreatedAt).ToEpoch(),
+		UpdatedAt: utils.NewDatetimeFromTime(res.UpdatedAt).ToEpoch(),
 	}, nil
 }

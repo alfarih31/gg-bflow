@@ -1,23 +1,23 @@
-package meta
+package metaImpl
 
 import (
 	"context"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ds/mongo"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ds/mongo/model"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/meta"
-	keyvalue "github.com/alfarih31/nb-go-keyvalue"
+	meta_dto "github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/meta"
+	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/repos/meta"
 	"go.mongodb.org/mongo-driver/bson"
 	mg "go.mongodb.org/mongo-driver/mongo"
 )
 
-type Retrieve interface {
-	FindOne(ctx context.Context, k string) (*meta_dto.Item, error)
+type reader struct {
 }
 
-type retrieve struct {
+func NewReader() meta.Reader {
+	return new(reader)
 }
 
-func (retrieve) FindOne(ctx context.Context, k string) (*meta_dto.Item, error) {
+func (r *reader) Read(ctx context.Context, k string) (*meta_dto.Item, error) {
 	i := new(model.Meta)
 	err := mongo.Query.Meta.Find(ctx, bson.M{"key": k}).One(i)
 
@@ -32,12 +32,8 @@ func (retrieve) FindOne(ctx context.Context, k string) (*meta_dto.Item, error) {
 	return &meta_dto.Item{
 		ID:        i.ID.String(),
 		Key:       i.Key,
-		Metadata:  keyvalue.KeyValue(i.Metadata),
+		Metadata:  i.Metadata,
 		CreatedAt: i.CreatedAt.Time(),
 		UpdatedAt: i.UpdatedAt.Time(),
 	}, nil
-}
-
-func NewRetrieve() Retrieve {
-	return new(retrieve)
 }

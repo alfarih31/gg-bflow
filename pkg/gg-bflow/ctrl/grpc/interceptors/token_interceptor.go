@@ -6,22 +6,18 @@ import (
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ctrl/grpc/errors"
 	_grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"regexp"
 	"strings"
 )
 
-func contains(arr []string, str string) bool {
-	for _, a := range arr {
-		if a == str {
-			return true
-		}
-	}
-	return false
-}
-
 func GetUnaryValidateTokenInterceptor(apiKey string, authorizedClients []string, whitelistMethod ...string) _grpc.UnaryServerInterceptor {
+	reWhiteListMethod := regexp.MustCompile(strings.Join(whitelistMethod, "|"))
+
+	reAuthorizedClient := regexp.MustCompile(strings.Join(authorizedClients, "|"))
+
 	return func(ctx context.Context, req interface{}, info *_grpc.UnaryServerInfo, handler _grpc.UnaryHandler) (resp interface{}, err error) {
 		// continue if whitelisted
-		if contains(whitelistMethod, info.FullMethod) {
+		if reWhiteListMethod.MatchString(info.FullMethod) {
 			return handler(ctx, req)
 		}
 
@@ -46,7 +42,7 @@ func GetUnaryValidateTokenInterceptor(apiKey string, authorizedClients []string,
 			return nil, errors.ErrMalformedToken
 		}
 
-		if !contains(authorizedClients, pair[0]) {
+		if !reAuthorizedClient.MatchString(pair[0]) {
 			return nil, errors.ErrUnauthorizedToken
 		}
 
@@ -59,9 +55,13 @@ func GetUnaryValidateTokenInterceptor(apiKey string, authorizedClients []string,
 }
 
 func GetStreamValidateTokenInterceptor(apiKey string, authorizedClients []string, whitelistMethod ...string) _grpc.StreamServerInterceptor {
+	reWhiteListMethod := regexp.MustCompile(strings.Join(whitelistMethod, "|"))
+
+	reAuthorizedClient := regexp.MustCompile(strings.Join(authorizedClients, "|"))
+
 	return func(srv interface{}, ss _grpc.ServerStream, info *_grpc.StreamServerInfo, handler _grpc.StreamHandler) error {
 		// continue if whitelisted
-		if contains(whitelistMethod, info.FullMethod) {
+		if reWhiteListMethod.MatchString(info.FullMethod) {
 			return handler(srv, ss)
 		}
 
@@ -86,7 +86,7 @@ func GetStreamValidateTokenInterceptor(apiKey string, authorizedClients []string
 			return errors.ErrMalformedToken
 		}
 
-		if !contains(authorizedClients, pair[0]) {
+		if !reAuthorizedClient.MatchString(pair[0]) {
 			return errors.ErrUnauthorizedToken
 		}
 

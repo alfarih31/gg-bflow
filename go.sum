@@ -58,6 +58,8 @@ github.com/alfarih31/nb-go-env v1.0.3 h1:Mj/aXc1XF1aDcjiMPDvqCRGcZ8twRAOl7O/LbUd
 github.com/alfarih31/nb-go-env v1.0.3/go.mod h1:oRkAXGHGozwGs16RwAAu0nPeu2Xf7idVxTzmIRBQRrw=
 github.com/alfarih31/nb-go-keyvalue v1.0.6 h1:UxVGYPFLkud0xY3Vlpzej9SChQJk3QFRQHOOLW9RDR8=
 github.com/alfarih31/nb-go-keyvalue v1.0.6/go.mod h1:qXXX7DRMoOfvuSzfoxe2l155wLNHSQesF3uq9Y5xG5Q=
+github.com/alfarih31/nb-go-keyvalue v1.0.9 h1:xApVkqVvmJEgOn7IEyB8WYo0C4t0SWR3JlqyeytVOEE=
+github.com/alfarih31/nb-go-keyvalue v1.0.9/go.mod h1:qXXX7DRMoOfvuSzfoxe2l155wLNHSQesF3uq9Y5xG5Q=
 github.com/alfarih31/nb-go-logger v1.0.1 h1:y5cgyKM9QES+200XGmhg0fl4PpBxqna+G7vW8oJFDz0=
 github.com/alfarih31/nb-go-logger v1.0.1/go.mod h1:dpZeiIlo900bXzYAADAX8Yj7QjGOJv2rVfdPMZ1LvUw=
 github.com/alfarih31/nb-go-parser v1.0.3 h1:UeNLCb6aKnnbjwzZd6zhSrCit1lhBkBjRhCetekpPas=

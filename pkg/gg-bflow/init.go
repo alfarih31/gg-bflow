@@ -5,6 +5,7 @@ import (
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ctrl"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ds"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/logger"
+	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/repos"
 )
 
 func Init(envFile ...string) error {
@@ -18,6 +19,10 @@ func Init(envFile ...string) error {
 	}
 
 	if err := ds.Init(); err != nil {
+		return err
+	}
+
+	if err := repos.Init(); err != nil {
 		return err
 	}
 

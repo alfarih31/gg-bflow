@@ -7,20 +7,18 @@ import (
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/ctrl/grpc/errors"
 	buffer_dto "github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/buffer"
 	meta_dto "github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/meta"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/svc/buffer"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/svc/meta"
+	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/repos/buffer"
+	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/repos/meta"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/validator"
-	grpc_message_adapters "github.com/alfarih31/gg-bflow/pkg/message-adapters"
+	"github.com/alfarih31/gg-bflow/pkg/utils"
 	"io"
 )
 
-type streamerCtrl struct {
-	gg_bflow.UnimplementedGGBFlowStreamerServer
-	bufferSvc buffer.BufferSvc
-	metaSvc   meta.MetaSvc
+type senderCtrl struct {
+	gg_bflow.UnimplementedGGBFlowSenderServer
 }
 
-func (c streamerCtrl) SendDiscreteFlow(ctx context.Context, in *gg_bflow.SendFlowArg) (*gg_bflow.Ok, error) {
+func (c *senderCtrl) SendDiscreteFlow(ctx context.Context, in *gg_bflow.SendFlowArg) (*gg_bflow.Ok, error) {
 	arg := &buffer_dto.WriteArg{
 		Key:  in.GetKey(),
 		Data: in.GetByte(),
@@ -36,7 +34,7 @@ func (c streamerCtrl) SendDiscreteFlow(ctx context.Context, in *gg_bflow.SendFlo
 		}
 	}
 
-	err := c.bufferSvc.Write(ctx, *arg)
+	err := buffer.Do.Write(ctx, arg.Key, arg.Data)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +44,7 @@ func (c streamerCtrl) SendDiscreteFlow(ctx context.Context, in *gg_bflow.SendFlo
 	}, nil
 }
 
-func (c streamerCtrl) SendFlow(s gg_bflow.GGBFlowStreamer_SendFlowServer) error {
+func (c *senderCtrl) SendFlow(s gg_bflow.GGBFlowSender_SendFlowServer) error {
 	var res = new(gg_bflow.Ok)
 	for {
 		in, err := s.Recv()
@@ -67,17 +65,37 @@ func (c streamerCtrl) SendFlow(s gg_bflow.GGBFlowStreamer_SendFlowServer) error 
 	return s.SendAndClose(res)
 }
 
-func (f *streamerCtrl) SaveMeta(ctx context.Context, in *gg_bflow.SaveMetaArg) (*gg_bflow.Ok, error) {
+func (f *senderCtrl) SendMeta(ctx context.Context, in *gg_bflow.SendMetaArg) (*gg_bflow.Ok, error) {
 	arg := meta_dto.WriteArg{
 		Key:  in.GetKey(),
-		Meta: grpc_message_adapters.GRPCKeyValueToKeyValue(in.GetMeta()),
+		Meta: in.GetMeta(),
 	}
 
 	if err := validator.Validate(arg); err != nil {
 		return nil, err
 	}
 
-	err := f.metaSvc.Write(ctx, arg)
+	// Get exist
+	i, err := meta.Do.Read(ctx, arg.Key)
+	if err != nil {
+		return nil, err
+	}
+
+	now := utils.NewDatetimeNow()
+	if i == nil {
+		i = &meta_dto.Item{
+			Key:      arg.Key,
+			Metadata: arg.Meta,
+		}
+
+		err = meta.Do.Write(ctx, *i)
+	} else {
+		i.Metadata = arg.Meta
+		i.UpdatedAt = now.GetTime()
+
+		err = meta.Do.Update(ctx, arg.Key, *i)
+	}
+
 	if err != nil {
 		return nil, err
 	}
