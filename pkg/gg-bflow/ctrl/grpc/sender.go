@@ -9,7 +9,6 @@ import (
 	meta_dto "github.com/alfarih31/gg-bflow/pkg/gg-bflow/dto/meta"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/repos/buffer"
 	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/repos/meta"
-	"github.com/alfarih31/gg-bflow/pkg/gg-bflow/validator"
 	"github.com/alfarih31/gg-bflow/pkg/utils"
 	"io"
 )
@@ -24,17 +23,13 @@ func (c *senderCtrl) SendDiscreteFlow(ctx context.Context, in *gg_bflow.SendFlow
 		Data: in.GetByte(),
 	}
 
-	if err := validator.Validate(arg); err != nil {
-		return nil, err
-	}
-
 	if configs.GGBFlow.BufferSizeLimit > 0 {
 		if cap(arg.Data) > configs.GGBFlow.BufferSizeLimit {
 			return nil, errors.ErrBufferLimitExceed
 		}
 	}
 
-	err := buffer.Do.Write(ctx, arg.Key, arg.Data)
+	err := buffer.Do.Write(ctx, arg.Key, arg.Data, true)
 	if err != nil {
 		return nil, err
 	}
@@ -69,10 +64,6 @@ func (f *senderCtrl) SendMeta(ctx context.Context, in *gg_bflow.SendMetaArg) (*g
 	arg := meta_dto.WriteArg{
 		Key:  in.GetKey(),
 		Meta: in.GetMeta(),
-	}
-
-	if err := validator.Validate(arg); err != nil {
-		return nil, err
 	}
 
 	// Get exist
